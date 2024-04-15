@@ -30,12 +30,12 @@ export class MovieModel {
       if (genres.length === 0) return []
 
       // genre found
+      const GENRE_QUERY =
+        'SELECT id, title, year, director, duration, poster, rate FROM movie_genres INNER JOIN movies ON movie_genres.movie_id = movies.id WHERE genre_id = $1;'
+      const { id: genre_id } = genres[0]
+      const { rows: movies } = await pool.query(GENRE_QUERY, [genre_id])
 
-      // get all movies ids from database table
-      // la query a movie_genres
-      // join
-      // y devolver resultados..
-      return []
+      return movies
     }
 
     const { rows: movies } = await pool.query(

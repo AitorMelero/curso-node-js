@@ -1,8 +1,7 @@
 -- Database: moviesdb
 
--- DROP DATABASE IF EXISTS moviesdb;
+DROP DATABASE IF EXISTS moviesdb;
 
-/*
 CREATE DATABASE moviesdb
     WITH
     OWNER = postgres
@@ -16,7 +15,6 @@ CREATE DATABASE moviesdb
 
 COMMENT ON DATABASE moviesdb
     IS 'Movies Database';
-*/	
 
 -- UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
