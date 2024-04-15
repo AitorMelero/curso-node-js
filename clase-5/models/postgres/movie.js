@@ -15,8 +15,6 @@ const pool = new Pool(DEFAULT_CONFIG)
 
 export class MovieModel {
   static async getAll({ genre }) {
-    console.log('getAll')
-
     if (genre) {
       const lowerCaseGenre = genre.toLowerCase()
 
@@ -53,6 +51,75 @@ export class MovieModel {
     )
 
     if (movies.length === 0) return null
+
+    return movies[0]
+  }
+
+  static async create({ input }) {
+    const {
+      genre: genreInput, // genre is an array
+      title,
+      year,
+      duration,
+      director,
+      rate,
+      poster,
+    } = input
+
+    // todo: crear la conexión de genre
+
+    // crypto.randomUUID()
+    const { rows: uuidResult } = await pool.query('SELECT uuid_generate_v4();')
+    const [{ uuid_generate_v4: uuid }] = uuidResult
+
+    try {
+      await pool.query(
+        `INSERT INTO movies (id, title, year, director, duration, poster, rate)
+          VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+        [uuid, title, year, director, duration, poster, rate]
+      )
+    } catch (e) {
+      // puede enviarle información sensible
+      throw new Error('Error creating movie')
+      // enviar la traza a un servicio interno
+      // sendLog(e)
+    }
+
+    const { rows: movies } = await pool.query(
+      `SELECT title, year, director, duration, poster, rate, id
+        FROM movies WHERE id = $1;`,
+      [uuid]
+    )
+
+    return movies[0]
+  }
+
+  static async delete({ id }) {
+    await pool.query(`DELETE FROM movies WHERE id = $1;`, [id])
+  }
+
+  static async update({ id, input }) {
+    const input_length = Object.keys(input).length
+    let input_set = []
+    let input_set_string = ''
+
+    Object.keys(input).forEach((key, index) => {
+      input_set.push(key + ' = $' + (index + 1))
+    })
+
+    input_set_string = input_set.join(', ')
+
+    const query_string = `UPDATE movies SET ${input_set_string} WHERE id = ${
+      '$' + (input_length + 1)
+    };`
+
+    await pool.query(query_string, [...Object.values(input), id])
+
+    const { rows: movies } = await pool.query(
+      `SELECT title, year, director, duration, poster, rate, id
+        FROM movies WHERE id = $1;`,
+      [id]
+    )
 
     return movies[0]
   }
