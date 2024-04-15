@@ -44,4 +44,16 @@ export class MovieModel {
 
     return movies
   }
+
+  static async getById({ id }) {
+    const { rows: movies } = await pool.query(
+      `SELECT title, year, director, duration, poster, rate, id
+        FROM movies WHERE id = $1;`,
+      [id]
+    )
+
+    if (movies.length === 0) return null
+
+    return movies[0]
+  }
 }
